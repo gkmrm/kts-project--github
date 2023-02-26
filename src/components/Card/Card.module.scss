@@ -1,0 +1,77 @@
+@import './src/styles/variables';
+
+.gitRepoTile {
+  box-sizing: border-box;
+  background: $background;
+  border: $border-main;
+  border-radius: $border-radius;
+  cursor: pointer;
+  width: 357px;
+  height: 104px;
+  padding: 12px;
+
+  display: flex;
+  gap: 12px;
+
+  transition: box-shadow 0.1s ease-in-out;
+
+  &:hover {
+    box-shadow: 0px 2px 6px rgba(182, 182, 182, 0.25);
+  }
+
+  .avatar {
+    border-radius: 50%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .description {
+    padding-top: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 241px;
+
+    gap: 4px;
+
+    .title {
+      display: flex;
+      font-weight: bold;
+      font-size: 16px;
+      min-height: 19px;
+      line-height: 19px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .link {
+      color: $text;
+      font-size: 14px;
+      line-height: 16px;
+      text-decoration: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: flex;
+    }
+
+    .info {
+      font-size: 14px;
+      line-height: 16px;
+      color: $text;
+      display: flex;
+      gap: 19px;
+    }
+    .star {
+      vertical-align: baseline;
+      &_count {
+        vertical-align: top;
+      }
+    }
+  }
+  .date {
+    margin-left: 1px;
+  }
+}

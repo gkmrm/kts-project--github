@@ -1,0 +1,45 @@
+.gridContainer {
+  display: grid;
+  grid-template-columns: 357px;
+  grid-auto-rows: auto;
+  column-gap: 12px;
+  gap: 16px;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.DropdownTypes {
+  font-size: 24px;
+  font-weight: bold;
+  display: grid;
+  grid-template-columns: 136px 160px;
+  grid-auto-rows: auto;
+  column-gap: 12px;
+  gap: 20px;
+  justify-content: space-between;
+}
+.DropdownTypesTitle {
+  display: inline-block;
+  margin: 10px 10px 0 0;
+}
+
+.Item {
+  display: grid;
+  row-gap: 16px;
+}
+
+.inputContainer {
+  display: grid;
+  grid-template-columns: 295px 50px;
+  grid-auto-rows: auto;
+  column-gap: 11px;
+  row-gap: 20px;
+  justify-content: center;
+}
+
+.ending_text {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  text-align: center;
+  margin: auto;
+}

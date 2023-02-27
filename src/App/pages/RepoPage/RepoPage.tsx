@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import Button from '@components/Button';
 import { Loader, LoaderSize } from '@components/Loader';
+import { urls } from '@config/urlsCreator';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +39,6 @@ interface IRepoInfo {
 export const RepoPage = () => {
   const { owner, name } = useParams();
   const [repoInfo, setRepoInfo] = useState<IRepoInfo | null>(null);
-  const [noInfoRepo, setNoInfoRepo] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -47,39 +47,30 @@ export const RepoPage = () => {
     setIsLoading(true);
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://api.github.com/repos/${owner}/${name}`);
-        const data: IGithubResponse = response.data;
+        if (owner && name) {
+          const response = await axios.get(urls.repos({ owner, name }));
+          const data: IGithubResponse = response.data;
 
-        // Get the README.md, any уберу
-        const readmeResponse = await axios.get(`https://api.github.com/repos/${owner}/${name}/readme`, {
-          headers: {
-            accept: 'application/vnd.github.html',
-          },
-        });
-        const readme: any = readmeResponse.data;
+          // Get the README.md
+          const readmeResponse = await axios.get(urls.readme({ owner, name }), {
+            headers: {
+              accept: 'application/vnd.github.html',
+            },
+          });
+          const readme: string = readmeResponse.data;
 
-        // Get the topics, any уберу
-        const topicsResponse = await axios.get(`https://api.github.com/repos/${owner}/${name}/topics`, {
-          headers: {
-            accept: 'application/vnd.github+json',
-          },
-        });
-        const topicsObj: any = topicsResponse.data;
-        const topics: any = topicsObj.names;
-
-        setRepoInfo({
-          name: data.name,
-          ownerLogin: data.owner.login,
-          homepage: data.homepage,
-          watchers_count: data.watchers_count,
-          forks: data.forks,
-          stargazers_count: data.stargazers_count,
-          readme: readme,
-          topics: topics,
-        });
-        setNoInfoRepo(false);
+          setRepoInfo({
+            name: data.name,
+            ownerLogin: data.owner.login,
+            homepage: data.homepage,
+            watchers_count: data.watchers_count,
+            forks: data.forks,
+            stargazers_count: data.stargazers_count,
+            topics: data.topics,
+            readme: readme,
+          });
+        }
       } catch (error) {
-        setNoInfoRepo(true);
         return (
           <p>
             <b>Error fetching data. Please try again later.</b>
@@ -97,7 +88,7 @@ export const RepoPage = () => {
   return (
     <div className={styles.container}>
       {isLoading && <Loader size={LoaderSize.l} />}
-      {noInfoRepo || !repoInfo ? (
+      {!repoInfo ? (
         <div style={{ display: isLoading ? 'none' : 'block' }}>There is no repository, or it is private</div>
       ) : (
         <div className={styles.repoInfo}>
@@ -113,7 +104,10 @@ export const RepoPage = () => {
           {repoInfo.homepage && (
             <div className={styles.homepageLink}>
               <img src={link} alt="Link Icon" />
-              <a href={repoInfo.homepage}> {formattedLink(repoInfo.homepage)} </a>
+              <a className={styles.link} href={repoInfo.homepage}>
+                {' '}
+                {formattedLink(repoInfo.homepage)}{' '}
+              </a>
             </div>
           )}
           <div>

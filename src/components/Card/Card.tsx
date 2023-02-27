@@ -6,6 +6,7 @@ import styles from './Card.module.scss';
 import star from './Star.svg';
 
 export type CardProps = {
+  id: number;
   image: string;
   title: string;
   owner: string;
@@ -15,10 +16,10 @@ export type CardProps = {
   onClick?: React.MouseEventHandler;
 };
 
-export const Card: React.FC<CardProps> = ({ image, title, owner, htmlLink, updated, starCount, onClick }) => {
+export const Card: React.FC<CardProps> = ({ id, image, title, owner, htmlLink, updated, starCount, onClick }) => {
   return (
     <div className={styles['gitRepoTile']} onClick={onClick}>
-      <img width={80} height={80} className={styles['avatar']} src={image} alt="Repository Avatar" />
+      <img className={styles['avatar']} src={image} alt="Repository Avatar" />
       <div className={styles['description']}>
         <div className={styles['title']}>{title}</div>
         <a className={styles['link']} href={htmlLink}>

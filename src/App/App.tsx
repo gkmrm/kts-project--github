@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { RepoPage } from './pages/RepoPage';
 import { Repositories } from './pages/Repositories';
 
-function App() {
+const App = () => {
   return (
     <BrowserRouter>
       <Routes>

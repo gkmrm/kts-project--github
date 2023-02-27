@@ -1,3 +1,5 @@
+@import './src/styles/variables';
+
 .gridContainer {
   display: grid;
   grid-template-columns: 357px;
@@ -9,7 +11,7 @@
 }
 
 .DropdownTypes {
-  font-size: 24px;
+  font-size: $font-size-greatest;
   font-weight: bold;
   display: grid;
   grid-template-columns: 136px 160px;
@@ -38,8 +40,7 @@
 }
 
 .ending_text {
-  font-family: 'Roboto', sans-serif;
-  font-size: 16px;
+  font-size: $font-size-big;
   text-align: center;
   margin: auto;
 }

@@ -7,7 +7,8 @@
   align-items: center;
   flex-direction: column;
   gap: 20px;
-  width: 397px;
+  max-width: 397px;
+  width: 100%;
 
   font-family: 'Roboto', sans-serif;
 
@@ -18,7 +19,7 @@
 
     .title {
       display: flex;
-      font-size: 24px;
+      font-size: $font-size-greatest;
       font-weight: bold;
     }
 
@@ -29,7 +30,7 @@
       div {
         padding-top: 8px;
         opacity: 0.8;
-        font-size: 14px;
+        font-size: $font-size-middle;
       }
     }
   }
@@ -40,25 +41,26 @@
 }
 
 .readmeText {
-  font-size: 12px;
+  font-size: $font-size-min;
   font-weight: bold;
 }
 
 .readme {
   margin-top: 21px;
-  font-size: 12px;
+  font-size: $font-size-min;
   padding: 15px;
   border: 1px solid $border;
   border-radius: $border-radius;
-  max-width: 357px;
+  width: 357px;
   overflow: auto;
-  a {
-    color: $link-color;
-  }
+}
+
+.link {
+  color: $link-color;
 }
 
 .topic {
-  font-size: 12px;
+  font-size: $font-size-min;
   font-weight: bold;
   display: inline-block;
   padding: 4px 16px 4px 16px;
@@ -75,14 +77,14 @@
 }
 
 .headerText {
-  font-size: 20px;
+  font-size: $font-size-large;
   font-weight: bold;
   padding-top: 10px;
 }
 
 .homepageLink {
   margin: 12px 0;
-  font-size: 14px;
+  font-size: $font-size-middle;
   color: $typerepo-text;
   font-weight: bold;
   a {

@@ -1,0 +1,6 @@
+@import './src/styles/variables';
+
+@mixin text-card-area() {
+  font-size: $font-size-middle;
+  line-height: 16px;
+}

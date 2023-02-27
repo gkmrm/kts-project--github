@@ -4,11 +4,13 @@ import Button from '@components/Button';
 import { Card } from '@components/Card';
 import { Input } from '@components/Input';
 import { MultiDropdown } from '@components/MultiDropdown';
+import { urls } from '@config/urlsCreator';
 import axios from 'axios';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import styles from './Repositories.module.scss';
+// import _ from 'lodash';
 
 interface IGithubResponse {
   owner: {
@@ -40,7 +42,7 @@ export const Repositories = () => {
   const [nextPage, setNextPage] = useState(1);
 
   const fetchData = async () => {
-    const data = (await axios.get(`https://api.github.com/orgs/${inputValue}/repos?page=` + nextPage)).data;
+    const data = (await axios.get(urls.orgs(inputValue) + nextPage)).data;
     const preFormatData = data.map((repo: IGithubResponse) => ({
       image: repo.owner.avatar_url,
       title: repo.name,
@@ -78,6 +80,8 @@ export const Repositories = () => {
       fetchData();
     }
   };
+  // useEffect = (() =>, [])
+  // _.debounce(handleClick, 5000);
 
   const navigate = useNavigate();
 
@@ -110,16 +114,7 @@ export const Repositories = () => {
         }
       >
         {repos.map((repo: IRepositoryInfo) => (
-          <Card
-            key={repo.id}
-            image={repo.image}
-            title={repo.title}
-            owner={repo.owner}
-            htmlLink={repo.htmlLink}
-            updated={repo.updated}
-            starCount={repo.starCount}
-            onClick={() => navigate(`/repo/${repo.owner}/${repo.title}`)}
-          />
+          <Card {...repo} onClick={() => navigate(`/repo/${repo.owner}/${repo.title}`)} />
         ))}
       </InfiniteScroll>
     </div>

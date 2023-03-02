@@ -1,0 +1,93 @@
+@import './src/styles/variables';
+
+.container {
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 397px;
+  width: 100%;
+
+  font-family: 'Roboto', sans-serif;
+
+  .repoInfo {
+    max-width: 357px;
+    margin: 0 auto;
+    padding: 10px 15px;
+
+    .title {
+      display: flex;
+      font-size: $font-size-greatest;
+      font-weight: bold;
+    }
+
+    .flexContainer {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      div {
+        padding-top: 8px;
+        opacity: 0.8;
+        font-size: $font-size-middle;
+      }
+    }
+  }
+}
+
+:global(body) {
+  margin: 0;
+}
+
+.readmeText {
+  font-size: $font-size-min;
+  font-weight: bold;
+}
+
+.readme {
+  margin-top: 21px;
+  font-size: $font-size-min;
+  padding: 15px;
+  border: 1px solid $border;
+  border-radius: $border-radius;
+  width: 357px;
+  overflow: auto;
+}
+
+.link {
+  color: $link-color;
+}
+
+.topic {
+  font-size: $font-size-min;
+  font-weight: bold;
+  display: inline-block;
+  padding: 4px 16px 4px 16px;
+  background-color: $typerepo-backgrond-color;
+  color: $typerepo-text;
+  border-radius: 20px;
+  margin-right: 8px;
+  margin-top: 6px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+}
+
+.headerText {
+  font-size: $font-size-large;
+  font-weight: bold;
+  padding-top: 10px;
+}
+
+.homepageLink {
+  margin: 12px 0;
+  font-size: $font-size-middle;
+  color: $typerepo-text;
+  font-weight: bold;
+  a {
+    text-decoration: none;
+  }
+}

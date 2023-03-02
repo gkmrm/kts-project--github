@@ -1,0 +1,67 @@
+@import './src/styles/variables';
+@import './src/styles/mixins';
+
+.multidropdown {
+  cursor: pointer;
+  box-sizing: border-box;
+  width: 160px;
+  height: 50px;
+  background: $background;
+  border: $border-main;
+  border-radius: $border-radius;
+  @include text-card-area;
+  padding-left: 10px;
+
+  &:hover {
+    border: 1px solid #ff5555;
+  }
+
+  &.focus {
+    border: 1px solid #d9d9d9;
+  }
+
+  &.disabled {
+    opacity: $opacity;
+    background: #f9f9f9;
+    cursor: not-allowed;
+  }
+}
+
+.title {
+  padding: 17px 12px;
+  line-height: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selectable {
+  position: absolute;
+  margin-top: 7px;
+  content: '';
+  width: 100%;
+  left: 0;
+  top: 50px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background-color: #ffffff;
+}
+
+.select {
+  cursor: pointer;
+  padding: 17px 12px;
+  line-height: 88%;
+  border-bottom: 1px solid #d9d9d9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.selected {
+    background-color: #f1f1f1;
+
+    & + .selected {
+      border-top: 1px solid #d9d9d9;
+    }
+  }
+}

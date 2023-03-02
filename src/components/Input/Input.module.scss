@@ -1,0 +1,23 @@
+@import './src/styles/variables';
+
+.input {
+  box-sizing: border-box;
+  width: 295px;
+  height: 50px;
+  background: $background;
+  border: $border-main;
+  border-radius: $border-radius;
+  font-size: $font-size-middle;
+  padding-left: 10px;
+
+  &:focus {
+    outline: none;
+    border-color: $accent;
+  }
+
+  &.input_disabled {
+    opacity: $opacity;
+    background: #f9f9f9;
+    cursor: not-allowed;
+  }
+}

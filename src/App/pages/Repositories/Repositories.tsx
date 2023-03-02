@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent } from 'react';
 
 import Button from '@components/Button';
 import { Card } from '@components/Card';
@@ -10,7 +10,6 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import styles from './Repositories.module.scss';
-// import _ from 'lodash';
 
 interface IGithubResponse {
   owner: {
@@ -63,7 +62,7 @@ export const Repositories = () => {
     }
   };
 
-  const handleClick = () => {
+  const sendRequest = (): void => {
     setHasMore(true);
     setNextPage(1);
     setRepos([]);
@@ -71,17 +70,15 @@ export const Repositories = () => {
     fetchData();
   };
 
+  const handleClick = () => {
+    sendRequest();
+  };
+
   const keyPressHandler = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.code === 'Enter') {
-      setHasMore(true);
-      setNextPage(1);
-      setRepos([]);
-      navigate(`/repo/${inputValue}`);
-      fetchData();
+      sendRequest();
     }
   };
-  // useEffect = (() =>, [])
-  // _.debounce(handleClick, 5000);
 
   const navigate = useNavigate();
 
@@ -114,7 +111,7 @@ export const Repositories = () => {
         }
       >
         {repos.map((repo: IRepositoryInfo) => (
-          <Card {...repo} onClick={() => navigate(`/repo/${repo.owner}/${repo.title}`)} />
+          <Card {...repo} key={repo.id} onClick={() => navigate(`/repo/${repo.owner}/${repo.title}`)} />
         ))}
       </InfiniteScroll>
     </div>

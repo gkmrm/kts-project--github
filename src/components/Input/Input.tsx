@@ -13,7 +13,7 @@ export const Input: React.FC<InputProps> = ({ value, onChange, className = '', .
     onChange(event.target.value);
   };
 
-  const inputClassName = `${styles.input} ${className} ${rest.disabled ? styles.input_disabled : ''}`;
+  const inputClassName = `${styles.input} ${className} ${rest.disabled && styles.input_disabled}`;
 
   return <input className={inputClassName} type="text" value={value} onChange={handleInputChange} {...rest} />;
 };

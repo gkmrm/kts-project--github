@@ -19,5 +19,5 @@ export type LoaderProps = {
 export const Loader: React.FC<LoaderProps> = ({ loading, size, className }) => {
   if (loading !== undefined)
     return <>{loading && <div className={classNames(styles.loader, size ? styles[size] : styles.m, className)} />}</>;
-  return <div className={classNames(styles.loader, size ? styles[size] : styles.m, className)} />;
+  return <div className={classNames(styles.loader, size ? styles.size : styles.l, className)} />;
 };

@@ -1,86 +1,80 @@
-import { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useEffect } from 'react';
 
 import Button from '@components/Button';
 import { Card } from '@components/Card';
+import { Dropdown } from '@components/Dropdown';
 import { Input } from '@components/Input';
-import { MultiDropdown } from '@components/MultiDropdown';
-import { urls } from '@config/urlsCreator';
-import axios from 'axios';
+import { Loader } from '@components/Loader';
+import { IRepositoriesGithubModel } from '@models/RepositoriesGitHub';
+import rootStore from '@rootStore/instance';
+import { RepositiriesStore } from '@store/RepositiriesStore';
+import { useQueryParamsStoreInit } from '@store/RootStore/hooks/useQueryParamsStoreInit';
+import { useLocalStore } from '@store/useLocalStore';
+import { Meta } from '@utils/meta';
+import { observer } from 'mobx-react-lite';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import styles from './Repositories.module.scss';
 
-interface IGithubResponse {
-  owner: {
-    avatar_url: string;
-    login: string;
-    html_url: string;
-  };
+export type Option = {
+  key: string;
   name: string;
-  updated_at: string;
-  stargazers_count: number;
-  id: number;
-}
+};
 
-interface IRepositoryInfo {
-  image: string;
-  title: string;
-  owner: string;
-  htmlLink: string;
-  updated: string;
-  starCount: number;
-  id: number;
-}
+const optionsType: Option[] = [
+  { key: 'all', name: 'All' },
+  { key: 'public', name: 'Public' },
+  { key: 'private', name: 'Private' },
+  { key: 'forks', name: 'Forks' },
+  { key: 'sources', name: 'Sources' },
+  { key: 'member', name: 'Member' },
+];
 
-export const Repositories = () => {
-  const { owner } = useParams();
-  const [inputValue, setInputValue] = useState(owner || '');
-  const [repos, setRepos] = useState<IRepositoryInfo[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [nextPage, setNextPage] = useState(1);
+const Repositories: React.FC = () => {
+  useQueryParamsStoreInit();
+  const root = rootStore;
+  const [, setParams] = useSearchParams();
+  const [selectType, setSelectType] = useState(root.query.getParam('type')?.toString() || 'all');
+  const [inputValue, setInputValue] = useState(root.query.getParam('search')?.toString() || '');
+  const store = useLocalStore(() => new RepositiriesStore());
 
-  const fetchData = async () => {
-    const data = (await axios.get(urls.orgs(inputValue) + nextPage)).data;
-    const preFormatData = data.map((repo: IGithubResponse) => ({
-      image: repo.owner.avatar_url,
-      title: repo.name,
-      owner: repo.owner.login,
-      htmlLink: repo.owner.html_url,
-      updated: repo.updated_at,
-      starCount: repo.stargazers_count,
-      id: repo.id,
-    }));
+  useEffect(() => {
+    setParams({ search: inputValue, type: selectType });
+  }, [inputValue, selectType, setParams]);
 
-    setRepos((prevState: IRepositoryInfo[]) => {
-      return [...prevState, ...preFormatData];
-    });
-    setNextPage((prevState) => prevState + 1);
+  const getRepositoriesList = React.useCallback(
+    () => store.getOrganiztionRepositoriesList({ org: inputValue, type: selectType }),
+    [inputValue, selectType, store]
+  );
 
-    if (preFormatData.length < 30) {
-      setHasMore(false);
+  React.useEffect(() => {
+    if (inputValue !== '') {
+      getRepositoriesList();
     }
-  };
-
-  const sendRequest = (): void => {
-    setHasMore(true);
-    setNextPage(1);
-    setRepos([]);
-    navigate(`/repo/${inputValue}`);
-    fetchData();
-  };
+  }, []);
 
   const handleClick = () => {
-    sendRequest();
+    store.reset();
+    getRepositoriesList();
   };
 
   const keyPressHandler = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.code === 'Enter') {
-      sendRequest();
+      store.reset();
+      getRepositoriesList();
     }
   };
 
-  const navigate = useNavigate();
+  const onChangeHandler = (value: string): void => {
+    setInputValue(value);
+  };
+
+  const onChangeDropdown = (select: string): void => {
+    setSelectType(select);
+    store.reset();
+    getRepositoriesList();
+  };
 
   return (
     <div className={styles.gridContainer}>
@@ -88,32 +82,40 @@ export const Repositories = () => {
         <Input
           placeholder="Enter organization name"
           value={inputValue}
-          onChange={setInputValue}
+          onChange={onChangeHandler}
           onKeyPress={keyPressHandler}
         />
         <Button onClick={handleClick} />
       </div>
       <div className={styles.DropdownTypes}>
         <span className={styles.DropdownTypesTitle}>Repositories</span>
-        <MultiDropdown disabled={true} onChange={() => {}} value={[]} options={[]} pluralizeOptions={() => ''} />
+        <Dropdown options={optionsType} value={selectType} onChange={onChangeDropdown} title={'Type:'} />
       </div>
       <InfiniteScroll
         style={{ fontSize: '40px' }}
         className={styles.Item}
-        dataLength={repos.length}
-        next={fetchData}
-        hasMore={hasMore}
-        loader={''}
+        dataLength={store.list.length}
+        next={() => getRepositoriesList()}
+        hasMore={store.hasMore}
+        loader={
+          store.meta === Meta.loading && (
+            <div className={styles.loader}>
+              <Loader />
+            </div>
+          )
+        }
         endMessage={
           <p className={styles.ending_text}>
             <b>You looked at all the repositories!</b>
           </p>
         }
       >
-        {repos.map((repo: IRepositoryInfo) => (
-          <Card {...repo} key={repo.id} onClick={() => navigate(`/repo/${repo.owner}/${repo.title}`)} />
+        {store.list.map((repo: IRepositoriesGithubModel) => (
+          <Card key={repo.id} {...repo} />
         ))}
       </InfiniteScroll>
     </div>
   );
 };
+
+export default observer(Repositories);

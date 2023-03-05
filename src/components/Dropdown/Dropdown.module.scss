@@ -1,7 +1,8 @@
 @import './src/styles/variables';
 @import './src/styles/mixins';
 
-.multidropdown {
+.dropdown {
+  font-weight: normal;
   cursor: pointer;
   box-sizing: border-box;
   width: 160px;
@@ -11,6 +12,7 @@
   border-radius: $border-radius;
   @include text-card-area;
   padding-left: 10px;
+  position: relative;
 
   &:hover {
     border: 1px solid #ff5555;
@@ -28,18 +30,18 @@
 }
 
 .title {
-  padding: 17px 12px;
-  line-height: 90%;
+  padding-top: 17px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: $opacity;
 }
 
 .selectable {
   position: absolute;
-  margin-top: 7px;
+  margin-top: 15px;
   content: '';
-  width: 100%;
+  width: 160px;
   left: 0;
   top: 50px;
   border: 1px solid #d9d9d9;

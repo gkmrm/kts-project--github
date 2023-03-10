@@ -1,5 +1,6 @@
 import { urls } from '@config/urlsCreator';
 import { IRepoPageGithubApi, IRepoPageGithubModel, normalizeRepoGithub } from '@models/RepoPageGitHub';
+import { Meta } from '@utils/meta';
 import axios from 'axios';
 import { makeObservable, observable, computed, action, runInAction } from 'mobx';
 
@@ -14,18 +15,21 @@ interface IRepositiriesStore {
   getRepoInfo(params: GetRepoParams): Promise<void>;
 }
 
-type PrivateFields = '_info' | '_isLoading';
+type PrivateFields = '_info' | '_isLoading' | '_metaReadme';
 
 export class RepoPageStore implements ILocalStore, IRepositiriesStore {
   private _info: IRepoPageGithubModel | null = null;
   private _isLoading: boolean = false;
+  private _metaReadme: Meta = Meta.initial;
   constructor() {
     makeObservable<RepoPageStore, PrivateFields>(this, {
       _info: observable.ref,
       _isLoading: observable,
+      _metaReadme: observable,
       info: computed,
       isLoading: computed,
       getRepoInfo: action.bound,
+      reset: action,
     });
   }
 
@@ -37,21 +41,44 @@ export class RepoPageStore implements ILocalStore, IRepositiriesStore {
     return this._isLoading;
   }
 
+  get metaReadme(): Meta {
+    return this._metaReadme;
+  }
+
+  reset(): void {
+    this._info = null;
+    this._isLoading = false;
+    this._metaReadme = Meta.initial;
+  }
+
   async getRepoInfo(params: GetRepoParams): Promise<void> {
     this._isLoading = true;
     try {
       const response = await axios.get(urls.repos({ ...params }));
-      const data: IRepoPageGithubApi = response.data;
-      const readmeResponse = await axios.get(urls.readme({ ...params }), {
-        headers: {
-          accept: 'application/vnd.github.html',
-        },
-      });
-      const readme = readmeResponse.data;
+      this._metaReadme = Meta.loading;
+      const readmeResponse = await axios
+        .get(urls.readme({ ...params }), {
+          headers: {
+            accept: 'application/vnd.github.html',
+          },
+        })
+        .catch((error) => {
+          // Handle README request error
+          if (error.response && error.response.status === 404) {
+            this._metaReadme = Meta.error;
+          } else {
+            throw error;
+          }
+        });
 
       runInAction(() => {
+        const data: IRepoPageGithubApi = response.data;
         this._info = normalizeRepoGithub(data);
-        this._info.readme = readme;
+        if (readmeResponse) {
+          this._metaReadme = Meta.success;
+          const readme = readmeResponse.data;
+          this._info.readme = readme;
+        }
       });
     } catch (error) {
       throw error;
@@ -60,5 +87,7 @@ export class RepoPageStore implements ILocalStore, IRepositiriesStore {
     }
   }
 
-  destroy(): void {}
+  destroy(): void {
+    this.reset();
+  }
 }

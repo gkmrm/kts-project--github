@@ -4,6 +4,7 @@ import Button from '@components/Button';
 import { Loader } from '@components/Loader';
 import { RepoPageStore } from '@store/RepoPageStore';
 import { useLocalStore } from '@store/useLocalStore';
+import getFormatLink from '@utils/getFormatLink';
 import { observer } from 'mobx-react-lite';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -21,8 +22,6 @@ const RepoPage = () => {
       store.getRepoInfo({ owner, name });
     }
   }, [name, owner, store]);
-
-  const formatLink = (link: string) => link?.split('https://');
 
   return (
     <div className={styles.container}>
@@ -45,7 +44,7 @@ const RepoPage = () => {
               <img src={link} alt="Link Icon" />
               <a className={styles.link} href={store.info.homePage}>
                 {' '}
-                {formatLink(store.info.homePage)}{' '}
+                {getFormatLink(store.info.homePage)}{' '}
               </a>
             </div>
           )}
@@ -69,10 +68,14 @@ const RepoPage = () => {
               </div>
             </div>
           </div>
-          {store.info?.readme && (
+          {store.info.readme ? (
             <div className={styles.readme}>
               <div className={styles.readmeText}>README.md</div>
               <div dangerouslySetInnerHTML={{ __html: store.info.readme! }} />
+            </div>
+          ) : (
+            <div className={styles.readme}>
+              <div className={styles.readmeText}>N0 README.md</div>
             </div>
           )}
         </div>

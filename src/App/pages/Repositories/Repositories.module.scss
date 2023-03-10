@@ -19,6 +19,7 @@
   column-gap: 12px;
   gap: 20px;
   justify-content: space-between;
+  position: relative;
 }
 .DropdownTypesTitle {
   display: inline-block;
@@ -43,4 +44,8 @@
   font-size: $font-size-big;
   text-align: center;
   margin: auto;
+}
+
+.loader {
+  margin: 20px auto;
 }

@@ -1,117 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import Button from '@components/Button';
-import { Loader, LoaderSize } from '@components/Loader';
-import { urls } from '@config/urlsCreator';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Loader } from '@components/Loader';
+import { RepoPageStore } from '@store/RepoPageStore';
+import { useLocalStore } from '@store/useLocalStore';
+import getFormatLink from '@utils/getFormatLink';
+import { observer } from 'mobx-react-lite';
+import { useParams, useNavigate } from 'react-router-dom';
 
-import eye from './icon//Eye.svg';
-import fork from './icon/Fork.svg';
-import link from './icon/Link.svg';
-import star from './icon/Star.svg';
+import { eye, fork, link, star } from './icon';
 import styles from './RepoPage.module.scss';
 
-interface IGithubResponse {
-  name: string;
-  owner: {
-    login: string;
-  };
-  watchers_count: number;
-  forks: number;
-  stargazers_count: number;
-  homepage: string;
-  topics: [];
-}
-
-interface IRepoInfo {
-  name: string;
-  ownerLogin: string;
-  watchers_count: number;
-  forks: number;
-  stargazers_count: number;
-  readme: string | null;
-  homepage: string;
-  topics: [];
-}
-
-export const RepoPage = () => {
+const RepoPage = () => {
   const { owner, name } = useParams();
-  const [repoInfo, setRepoInfo] = useState<IRepoInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const store = useLocalStore(() => new RepoPageStore());
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    setIsLoading(true);
-    const fetchData = async () => {
-      try {
-        if (owner && name) {
-          const response = await axios.get(urls.repos({ owner, name }));
-          const data: IGithubResponse = response.data;
-
-          // Get the README.md
-          const readmeResponse = await axios.get(urls.readme({ owner, name }), {
-            headers: {
-              accept: 'application/vnd.github.html',
-            },
-          });
-          const readme: string = readmeResponse.data;
-
-          setRepoInfo({
-            name: data.name,
-            ownerLogin: data.owner.login,
-            homepage: data.homepage,
-            watchers_count: data.watchers_count,
-            forks: data.forks,
-            stargazers_count: data.stargazers_count,
-            topics: data.topics,
-            readme: readme,
-          });
-        }
-      } catch (error) {
-        return (
-          <p>
-            <b>Error fetching data. Please try again later.</b>
-          </p>
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [owner, name]);
-
-  const formattedLink = (link: string) => link?.split('https://');
+    if (owner && name) {
+      store.getRepoInfo({ owner, name });
+    }
+  }, [name, owner, store]);
 
   return (
     <div className={styles.container}>
-      {isLoading && <Loader size={LoaderSize.l} />}
-      {!repoInfo ? (
-        <div style={{ display: isLoading ? 'none' : 'block' }}>There is no repository, or it is private</div>
+      {store.isLoading && <Loader />}
+      {!store.info ? (
+        <div style={{ display: store.isLoading ? 'none' : 'block' }}>There is no repository, or it is private</div>
       ) : (
         <div className={styles.repoInfo}>
           <div className={styles.header}>
-            <Button backPage={true} className={styles.button} onClick={() => navigate(`/repo/${owner}`)}>
+            <Button backPage={true} className={styles.button} onClick={() => navigate(-1)}>
               <img className={styles.BackIcon} src={eye} alt="Eye Icon" />
               Back to previous page
             </Button>
             <span className={styles.headerText}>
-              {repoInfo.ownerLogin}/{repoInfo.name}
+              {store.info.ownerLogin}/{store.info.name}
             </span>
           </div>
-          {repoInfo.homepage && (
+          {store.info.homePage && (
             <div className={styles.homepageLink}>
               <img src={link} alt="Link Icon" />
-              <a className={styles.link} href={repoInfo.homepage}>
+              <a className={styles.link} href={store.info.homePage}>
                 {' '}
-                {formattedLink(repoInfo.homepage)}{' '}
+                {getFormatLink(store.info.homePage)}{' '}
               </a>
             </div>
           )}
           <div>
-            {repoInfo.topics.map((topic, index) => (
+            {store.info.topics.map((topic: string, index: number) => (
               <div key={index} className={styles.topic}>
                 {topic}
               </div>
@@ -120,20 +58,24 @@ export const RepoPage = () => {
           <div className={styles.flexContainer}>
             <div className={styles.information}>
               <div>
-                <img src={star} alt="Star Icon" /> <strong>{repoInfo.stargazers_count}</strong> stars
+                <img src={star} alt="Star Icon" /> <strong>{store.info.starCount}</strong> stars
               </div>
               <div>
-                <img src={eye} alt="Eye Icon" /> <strong>{repoInfo.watchers_count}</strong> watching
+                <img src={eye} alt="Eye Icon" /> <strong>{store.info.watchersCount}</strong> watching
               </div>
               <div>
-                <img src={fork} alt="Fork Icon" /> <strong>{repoInfo.forks}</strong> fork
+                <img src={fork} alt="Fork Icon" /> <strong>{store.info.forks}</strong> fork
               </div>
             </div>
           </div>
-          {repoInfo?.readme && (
+          {store.info.readme ? (
             <div className={styles.readme}>
               <div className={styles.readmeText}>README.md</div>
-              <div dangerouslySetInnerHTML={{ __html: repoInfo.readme! }} />
+              <div dangerouslySetInnerHTML={{ __html: store.info.readme! }} />
+            </div>
+          ) : (
+            <div className={styles.readme}>
+              <div className={styles.readmeText}>N0 README.md</div>
             </div>
           )}
         </div>
@@ -141,3 +83,5 @@ export const RepoPage = () => {
     </div>
   );
 };
+
+export default observer(RepoPage);

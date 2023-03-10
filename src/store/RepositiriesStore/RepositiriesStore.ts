@@ -1,8 +1,10 @@
 import { urls } from '@config/urlsCreator';
 import { IRepositoriesGithubModel, normalizeRepositoriesGitHub } from '@models/RepositoriesGitHub';
+import rootStore from '@store/RootStore/instance';
 import { Meta } from '@utils/meta';
 import axios from 'axios';
-import { makeObservable, observable, computed, action, runInAction } from 'mobx';
+import _ from 'lodash';
+import { makeObservable, observable, computed, action, runInAction, reaction } from 'mobx';
 
 import { ILocalStore } from '../useLocalStore';
 
@@ -12,15 +14,16 @@ export type Option = {
 };
 
 export type GetOrganiztionRepositoriesListParams = {
-  org: string;
+  value: string;
   type: string;
+  nextPage: number;
 };
 
 interface IRepositiriesStore {
   getOrganiztionRepositoriesList(params: GetOrganiztionRepositoriesListParams): Promise<void>;
 }
 
-type PrivateFields = '_list' | '_hasMore' | '_meta' | '_nextPage';
+type PrivateFields = '_list' | '_hasMore' | '_meta' | '_nextPage' | '_type' | '_value';
 
 export class RepositiriesStore implements ILocalStore, IRepositiriesStore {
   private _list: IRepositoriesGithubModel[] = [];
@@ -28,6 +31,11 @@ export class RepositiriesStore implements ILocalStore, IRepositiriesStore {
   private _hasMore: boolean = true;
   private _nextPage: number = 1;
   private readonly _length: number = 30;
+  private _type: Option = {
+    key: 'all',
+    name: 'All',
+  };
+  private _value: string = '';
 
   constructor() {
     makeObservable<RepositiriesStore, PrivateFields>(this, {
@@ -35,10 +43,16 @@ export class RepositiriesStore implements ILocalStore, IRepositiriesStore {
       _meta: observable,
       _hasMore: observable,
       _nextPage: observable,
+      _type: observable.ref,
+      _value: observable,
       list: computed,
       meta: computed,
       hasMore: computed,
-      getOrganiztionRepositoriesList: action,
+      type: computed,
+      setType: action,
+      setValue: action,
+      getOrganiztionRepositoriesList: action.bound,
+      getNextRepositoriesList: action.bound,
       reset: action,
     });
   }
@@ -51,36 +65,92 @@ export class RepositiriesStore implements ILocalStore, IRepositiriesStore {
     return this._meta;
   }
 
+  get value(): string {
+    return this._value;
+  }
+
   get hasMore(): boolean {
     return this._hasMore;
   }
 
+  get type(): Option {
+    return this._type;
+  }
+
+  setValue = (value: string) => {
+    this._value = value;
+  };
+
+  setType = (type: Option) => {
+    this._type = type;
+    if (this.value !== '') {
+      this.getOrganiztionRepositoriesList();
+    }
+  };
+
   reset(): void {
+    this._meta = Meta.initial;
+    this._list = [];
     this._hasMore = true;
     this._nextPage = 1;
-    this._list = [];
-    this._meta = Meta.initial;
   }
-  async getOrganiztionRepositoriesList(params: GetOrganiztionRepositoriesListParams): Promise<void> {
-    const response = await axios.get(urls.orgs(params) + this._nextPage);
 
-    runInAction(() => {
-      try {
-        this._meta = Meta.loading;
+  getRepositoriesList = async (nextPage: number): Promise<void> => {
+    this._meta = Meta.loading;
+
+    try {
+      const response = await axios.get(urls.orgs({ value: this._value }), {
+        params: { type: this._type.key, page: nextPage },
+      });
+
+      runInAction(() => {
         const data = response.data.map(normalizeRepositoriesGitHub);
-        this._list = [...this._list, ...data];
-        this._nextPage = this._nextPage + 1;
+
+        if (nextPage === 1) {
+          this._list = [...data];
+        } else {
+          this._list = [...this._list, ...data];
+        }
+
+        this._nextPage = nextPage + 1;
 
         if (data.length < this._length) {
           this._hasMore = false;
         }
-        this._meta = Meta.success;
-      } catch (error) {
-        this._meta = Meta.error;
-        throw error;
-      }
-    });
-  }
 
-  destroy(): void {}
+        this._meta = Meta.success;
+      });
+    } catch (error) {
+      this._meta = Meta.error;
+      throw error;
+    }
+  };
+
+  getOrganiztionRepositoriesList = async (): Promise<void> => {
+    this.reset();
+
+    await this.getRepositoriesList(this._nextPage);
+  };
+
+  getNextRepositoriesList = async (): Promise<void> => {
+    if (!this._hasMore) {
+      return;
+    }
+
+    await this.getRepositoriesList(this._nextPage);
+  };
+
+  private _debounceSearch = _.debounce(action(this.getOrganiztionRepositoriesList), 1000);
+
+  private _queryReaction = reaction(
+    () => rootStore.query.getParam('search'),
+    () => {
+      this._debounceSearch();
+    }
+  );
+
+  destroy(): void {
+    this._queryReaction();
+    this.reset();
+  }
 }

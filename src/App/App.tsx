@@ -1,8 +1,10 @@
 import RepoPage from '@pages/RepoPage';
 import Repositories from '@pages/Repositories';
+import { useQueryParamsStoreInit } from '@store/RootStore/hooks/useQueryParamsStoreInit';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 const App = () => {
+  useQueryParamsStoreInit();
   return (
     <Routes>
       <Route path="/" element={<Repositories />} />

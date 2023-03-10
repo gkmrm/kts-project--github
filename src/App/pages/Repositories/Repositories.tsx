@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent, useEffect } from 'react';
+import React, { KeyboardEvent } from 'react';
 
 import Button from '@components/Button';
 import { Card } from '@components/Card';
@@ -6,14 +6,12 @@ import { Dropdown } from '@components/Dropdown';
 import { Input } from '@components/Input';
 import { Loader } from '@components/Loader';
 import { IRepositoriesGithubModel } from '@models/RepositoriesGitHub';
-import rootStore from '@rootStore/instance';
 import { RepositiriesStore } from '@store/RepositiriesStore';
-import { useQueryParamsStoreInit } from '@store/RootStore/hooks/useQueryParamsStoreInit';
 import { useLocalStore } from '@store/useLocalStore';
 import { Meta } from '@utils/meta';
 import { observer } from 'mobx-react-lite';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import styles from './Repositories.module.scss';
 
@@ -32,70 +30,72 @@ const optionsType: Option[] = [
 ];
 
 const Repositories: React.FC = () => {
-  useQueryParamsStoreInit();
-  const root = rootStore;
-  const [, setParams] = useSearchParams();
-  const [selectType, setSelectType] = useState(root.query.getParam('type')?.toString() || 'all');
-  const [inputValue, setInputValue] = useState(root.query.getParam('search')?.toString() || '');
   const store = useLocalStore(() => new RepositiriesStore());
+  const [params, setParams] = useSearchParams();
 
-  useEffect(() => {
-    setParams({ search: inputValue, type: selectType });
-  }, [inputValue, selectType, setParams]);
+  const onChange = React.useCallback(
+    (str: string) => {
+      store.setValue(str);
+      setParams({ search: str || '', type: params.get('type') || 'all' });
+    },
+    [setParams, params]
+  );
 
-  const getRepositoriesList = React.useCallback(
-    () => store.getOrganiztionRepositoriesList({ org: inputValue, type: selectType }),
-    [inputValue, selectType, store]
+  const onChangeType = React.useCallback(
+    (type: Option) => {
+      store.setType(type);
+      setParams({ search: params.get('search') || '', type: type.key });
+    },
+    [store, params, setParams]
   );
 
   React.useEffect(() => {
-    if (inputValue !== '') {
-      getRepositoriesList();
+    if (params.get('search')) {
+      store.setValue(params.get('search') || '');
+      if (params.get('type')) {
+        store.setType(optionsType.find((obj) => obj.key === params.get('type')) || { key: 'all', name: 'All' });
+      }
     }
   }, []);
 
-  const handleClick = () => {
-    store.reset();
-    getRepositoriesList();
-  };
+  const handleClick = React.useCallback(() => {
+    store.getOrganiztionRepositoriesList();
+  }, []);
 
-  const keyPressHandler = (event: KeyboardEvent<HTMLInputElement>) => {
+  const keyPressHandler = React.useCallback((event: KeyboardEvent<HTMLInputElement>) => {
     if (event.code === 'Enter') {
-      store.reset();
-      getRepositoriesList();
+      store.getOrganiztionRepositoriesList();
     }
-  };
+  }, []);
 
-  const onChangeHandler = (value: string): void => {
-    setInputValue(value);
-  };
-
-  const onChangeDropdown = (select: string): void => {
-    setSelectType(select);
-    store.reset();
-    getRepositoriesList();
-  };
+  const navigate = useNavigate();
+  const onClickCard = React.useCallback(
+    (owner: string, title: string) => {
+      navigate(`/repo/${owner}/${title}`);
+    },
+    [navigate]
+  );
 
   return (
     <div className={styles.gridContainer}>
       <div className={styles.inputContainer}>
         <Input
           placeholder="Enter organization name"
-          value={inputValue}
-          onChange={onChangeHandler}
+          value={store.value}
+          onChange={onChange}
           onKeyPress={keyPressHandler}
         />
         <Button onClick={handleClick} />
       </div>
       <div className={styles.DropdownTypes}>
         <span className={styles.DropdownTypesTitle}>Repositories</span>
-        <Dropdown options={optionsType} value={selectType} onChange={onChangeDropdown} title={'Type:'} />
+        <Dropdown options={optionsType} value={store.type} onChange={onChangeType} title={'Type:'} />
       </div>
       <InfiniteScroll
         style={{ fontSize: '40px' }}
         className={styles.Item}
         dataLength={store.list.length}
-        next={() => getRepositoriesList()}
+        next={() => store.getNextRepositoriesList()}
         hasMore={store.hasMore}
         loader={
           store.meta === Meta.loading && (
@@ -110,8 +110,8 @@ const Repositories: React.FC = () => {
           </p>
         }
       >
-        {store.list.map((repo: IRepositoriesGithubModel) => (
-          <Card key={repo.id} {...repo} />
+        {store.list?.map((repo: IRepositoriesGithubModel) => (
+          <Card key={repo.id} {...repo} onClick={onClickCard} />
         ))}
       </InfiniteScroll>
     </div>

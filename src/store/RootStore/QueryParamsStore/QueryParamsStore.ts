@@ -6,12 +6,10 @@ type PrivateFields = '_params';
 export default class QueryParamsStore {
   private _params: qs.ParsedQs = {};
   private _search: string = '';
-  private _type: string = '';
 
   constructor() {
     makeObservable<QueryParamsStore, PrivateFields>(this, {
       _params: observable.ref,
-      setType: action,
       setSearch: action,
     });
   }
@@ -20,20 +18,11 @@ export default class QueryParamsStore {
     return this._params[key];
   }
 
-  setType(type: string) {
-    type = type.startsWith('&') ? type.slice(1) : type;
-
-    if (this._type !== type) {
-      this._type = type;
-      this._params = qs.parse(type);
-    }
-  }
-
   setSearch(search: string) {
+    search = search.startsWith('?') ? search.slice(1) : search;
     if (this._search === search) {
       return;
     }
-    search = search.startsWith('?') ? search.slice(1) : search;
     this._search = search;
     this._params = qs.parse(search);
   }

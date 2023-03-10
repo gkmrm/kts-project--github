@@ -1,7 +1,6 @@
 import React from 'react';
 
 import getFormatDate from '@utils/getFormatDate';
-import { useNavigate } from 'react-router-dom';
 
 import styles from './Card.module.scss';
 import star from './Star.svg';
@@ -13,16 +12,12 @@ export type CardProps = {
   htmlLink: string;
   updated: Date;
   starCount: number;
-  onClick?: React.MouseEventHandler;
+  onClick?: (owner: string, title: string) => void;
 };
 
 const Card: React.FC<CardProps> = ({ image, title, owner, htmlLink, updated, starCount, onClick }) => {
-  const navigate = useNavigate();
-  if (!onClick) {
-    onClick = () => navigate(`/repo/${owner}/${title}`);
-  }
   return (
-    <div className={styles.gitRepoTile} onClick={onClick}>
+    <div className={styles.gitRepoTile} onClick={() => onClick && onClick(owner, title)}>
       <img className={styles.avatar} src={image} alt="Repository Avatar" />
       <div className={styles.description}>
         <div className={styles.title}>{title}</div>
@@ -46,4 +41,4 @@ const Card: React.FC<CardProps> = ({ image, title, owner, htmlLink, updated, sta
   );
 };
 
-export default Card;
+export default React.memo(Card);

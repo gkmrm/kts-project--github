@@ -11,8 +11,8 @@ export type Option = {
 
 export type DropdownProps = {
   options: Option[];
-  value: string;
-  onChange: (value: string) => void;
+  value: Option;
+  onChange: (value: Option) => void;
   disabled?: boolean;
   title?: string;
 };
@@ -25,9 +25,13 @@ const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, disabled,
     setOpen(!open);
   };
 
+  React.useEffect(() => {
+    setOpen(false);
+  }, [disabled]);
+
   const handleChange = (obj: Option) => {
-    if (value !== obj.key) {
-      onChange(obj.key);
+    if (value.name !== obj.name) {
+      onChange(obj);
       setOpen(false);
     }
   };
@@ -35,7 +39,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, disabled,
   return (
     <div className={classNames(styles.dropdown, open && styles.focus, disabled && styles.disabled)}>
       <div className={styles.title} onClick={handleClick}>
-        {title} {value}
+        {title} {value.name}
       </div>
       {open && (
         <div className={styles.selectable}>
@@ -43,9 +47,9 @@ const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, disabled,
             <div
               key={obj.key}
               onClick={() => handleChange(obj)}
-              className={classNames(styles.select, value === obj.key && styles.selected)}
+              className={classNames(styles.select, value.name === obj.name && styles.selected)}
             >
-              {obj.key}
+              {obj.name}
             </div>
           ))}
         </div>

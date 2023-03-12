@@ -40,9 +40,9 @@
 .selectable {
   position: absolute;
   margin-top: 15px;
+  right: -1px;
   content: '';
   width: 160px;
-  left: 0;
   top: 50px;
   border: 1px solid #d9d9d9;
   border-radius: 6px;
@@ -52,7 +52,7 @@
 .select {
   cursor: pointer;
   padding: 17px 12px;
-  line-height: 88%;
+  line-height: 108%;
   border-bottom: 1px solid #d9d9d9;
 
   &:last-child {

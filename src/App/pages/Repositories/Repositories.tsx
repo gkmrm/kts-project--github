@@ -1,4 +1,4 @@
-import React, { KeyboardEvent } from 'react';
+import React from 'react';
 
 import Button from '@components/Button';
 import { Card } from '@components/Card';
@@ -62,7 +62,7 @@ const Repositories: React.FC = () => {
     store.getOrganiztionRepositoriesList();
   }, []);
 
-  const keyPressHandler = React.useCallback((event: KeyboardEvent<HTMLInputElement>) => {
+  const keyPressHandler = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.code === 'Enter') {
       store.getOrganiztionRepositoriesList();
     }
@@ -110,9 +110,14 @@ const Repositories: React.FC = () => {
           </p>
         }
       >
-        {store.list?.map((repo: IRepositoriesGithubModel) => (
-          <Card key={repo.id} {...repo} onClick={onClickCard} />
-        ))}
+        {store.meta === Meta.error ? (
+          <div className={styles.ending_text}>
+            <p>Unfortunately, there is no such organization :(</p>
+            <p>Try changing the name of the organization! :)</p>
+          </div>
+        ) : (
+          store.list.map((repo: IRepositoriesGithubModel) => <Card key={repo.id} {...repo} onClick={onClickCard} />)
+        )}
       </InfiniteScroll>
     </div>
   );

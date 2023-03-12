@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React from 'react';
 
 import Button from '@components/Button';
 import { Loader } from '@components/Loader';
@@ -17,7 +17,7 @@ const RepoPage = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (owner && name) {
       store.getRepoInfo({ owner, name });
     }

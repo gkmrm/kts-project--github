@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "eslint.format.enable": true,
+  "files.eol": "\n",
+  "eslint.options": {
+    "ignorePattern": "webpack.config.js"
+  }
+}

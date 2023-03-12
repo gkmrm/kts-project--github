@@ -1,3 +1,5 @@
+import React from 'react';
+
 import RepoPage from '@pages/RepoPage';
 import Repositories from '@pages/Repositories';
 import { useQueryParamsStoreInit } from '@store/RootStore/hooks/useQueryParamsStoreInit';

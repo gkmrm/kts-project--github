@@ -120,9 +120,8 @@ export class RepositiriesStore implements ILocalStore, IRepositiriesStore {
 
         this._meta = Meta.success;
       });
-    } catch (error) {
+    } catch (e) {
       this._meta = Meta.error;
-      throw error;
     }
   };
 
